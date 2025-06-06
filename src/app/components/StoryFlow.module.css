@@ -13,7 +13,7 @@
     color: var(--story-text-color-main); /* สีข้อความหลักสำหรับ Story Stage (กำหนดใน globals.css) */
     z-index: 200; /* Layer ของ StoryFlow */
     overflow-x: hidden; /* ป้องกันการ scroll แนวนอนที่ไม่ต้องการ */
-    overflow-y: auto;   /* สำคัญ: อนุญาตให้ scroll แนวตั้งถ้าเนื้อหาของ StoryPageDisplay ยาวเกิน */
+    overflow-y: hidden;  
     padding-top: 40px;    /* ระยะห่างด้านบนภายใน wrapper */
     padding-bottom: 60px; /* ระยะห่างด้านล่างภายใน wrapper (อาจจะเพิ่มเผื่อปุ่ม) */
     padding-left: 20px;   /* ระยะห่างด้านข้าง */

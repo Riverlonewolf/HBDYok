@@ -37,8 +37,8 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata = {
-  title: 'สุขสันต์วันเกิดนะ [ชื่อเพื่อน]!', // <<<< แก้ไข
-  description: 'เว็บอวยพรวันเกิดสุดพิเศษสำหรับ [ชื่อเพื่อน]!', // <<<< แก้ไข
+  title: 'สุขสันต์วันเกิดนะหยก!', // <<<< แก้ไข
+  description: 'เว็บอวยพรวันเกิดหยก', // <<<< แก้ไข
 };
 
 export default function RootLayout({ children }) {

@@ -4,171 +4,185 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import styles from './StoryPageDisplay.module.css';
 
-// TypewriterEffect component (assuming it's defined above or imported)
-// ... (TypewriterEffect component code as provided) ...
-function TypewriterEffect({ text, speed, lineBreakPause, startCondition, storyId }) {
-    const [displayText, setDisplayText] = useState('');
-    const typingTimeoutRef = useRef(null);
-    const isMountedRef = useRef(true);
-
-    useEffect(() => {
-        isMountedRef.current = true;
-        return () => {
-            isMountedRef.current = false;
-            clearTimeout(typingTimeoutRef.current);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!startCondition || !text) { // If no text, clear display
-            setDisplayText('');
-            clearTimeout(typingTimeoutRef.current);
-            return;
-        }
-        setDisplayText(''); // Reset display text when props change
-        let i = 0;
-        const type = () => {
-            if (!isMountedRef.current) return;
-            if (i < text.length) {
-                setDisplayText(prev => prev + (text.charAt(i) === '\n' ? '<br>' : text.charAt(i)));
-                i++;
-                typingTimeoutRef.current = setTimeout(type, text.charAt(i-1) === '\n' ? lineBreakPause : speed);
-            }
-        };
-        // Simplified start delay logic for typewriter
-        const startDelay = 700; // General delay, adjust as needed
-        typingTimeoutRef.current = setTimeout(type, startDelay);
-
-        return () => clearTimeout(typingTimeoutRef.current);
-    }, [text, speed, lineBreakPause, startCondition, storyId]);
-
-    // Only render the paragraph if there's text to display or it's actively typing
-    if (!text && displayText === '') {
-        return null;
-    }
-
-    return (
-        <p
-            id={`story-text-display-${storyId}`}
-            className={`${styles.storyTextArea} ${(startCondition && text) ? styles.storyTextArea_visible : ''}`}
-            dangerouslySetInnerHTML={{ __html: displayText }}
-        />
-    );
-}
-
+const TYPING_SOUND_SRC = '/audio/typing.mp3';
 
 export default function StoryPageDisplay({
     storyData,
     startTyping,
-    onTriggerStartFlow,
     onNext,
+    onTriggerStartFlow,
     isLastStory,
     animationClass
 }) {
-    const [showSecret, setShowStorySecret] = useState(false);
-    const [imageVisible, setImageVisible] = useState(false);
+    if (!storyData) {
+        return null;
+    }
+
+    const { id, title, text, image, isPrologue, hasMusicButton, reveal } = storyData;
+    const fullText = text || '';
+
+    const [displayedText, setDisplayedText] = useState('');
+    const [isTypingFinished, setIsTypingFinished] = useState(false);
+    const [isTypingActive, setIsTypingActive] = useState(false);
+    const [showRevealContent, setShowRevealContent] = useState(false);
+    const [isImageWrapperVisible, setIsImageWrapperVisible] = useState(false);
+    const [isTextAreaVisible, setIsTextAreaVisible] = useState(false);
+
+    const typingAudioRef = useRef(null);
     const pageDisplayRef = useRef(null);
 
-    const isProloguePage = storyData?.isPrologue === true;
-
+    // Effect for visibility animations (เหมือนเดิม)
     useEffect(() => {
-        setImageVisible(false); // Reset on component key change (storyData.id)
+        setIsImageWrapperVisible(false);
+        setIsTextAreaVisible(false);
+        setDisplayedText('');
+        setIsTypingFinished(false);
+        setIsTypingActive(false);
+        setShowRevealContent(false);
 
-        if (isProloguePage) {
-            // For prologue, no image to load/fade in. Consider "image" aspects ready.
-            setImageVisible(true);
-            return;
-        }
-
-        // For non-prologue pages:
-        if (pageDisplayRef.current && storyData.image) {
-            const handlePageAnimEnd = () => {
-                if (pageDisplayRef.current) { // Check if still mounted
-                    setImageVisible(true);
-                }
+        const pageElement = pageDisplayRef.current;
+        if (pageElement) {
+            const showElements = () => {
+                setIsImageWrapperVisible(true);
+                setIsTextAreaVisible(true);
             };
-            // If no animation class, or animation is very short, show immediately or after a small delay
-            if (!animationClass || animationClass.trim() === 'animate__animated animate__fast') {
-                 setTimeout(() => setImageVisible(true), 50); // Small delay for fast animations or no animation
-            } else {
-                pageDisplayRef.current.addEventListener('animationend', handlePageAnimEnd, { once: true });
-            }
+
+            const handlePageAnimEnd = () => setTimeout(showElements, 50);
+            pageElement.addEventListener('animationend', handlePageAnimEnd, { once: true });
+            
+            // Fallback if no animation
+            const timer = setTimeout(() => {
+                if(!animationClass || animationClass.trim() === '') showElements();
+            }, 100);
+
             return () => {
-                if (pageDisplayRef.current && animationClass && animationClass.trim() !== 'animate__animated animate__fast') {
-                    pageDisplayRef.current.removeEventListener('animationend', handlePageAnimEnd);
-                }
+                pageElement.removeEventListener('animationend', handlePageAnimEnd);
+                clearTimeout(timer);
             };
-        } else if (!storyData.image) { // Non-prologue page, but no image defined
-            setImageVisible(true);
         }
-    }, [animationClass, storyData?.image, storyData?.id, isProloguePage]);
+    }, [id, animationClass]);
 
-    const toggleSecret = () => setShowStorySecret(prev => !prev);
+    // Typewriter Effect (เหมือนเดิม)
+    useEffect(() => {
+        if (startTyping && isTextAreaVisible && !isTypingFinished && fullText) {
+            setIsTypingActive(true);
+            let charIndex = 0;
+            const intervalId = setInterval(() => {
+                if (charIndex < fullText.length) {
+                    setDisplayedText(fullText.slice(0, charIndex + 1));
+                    charIndex++;
+                } else {
+                    clearInterval(intervalId);
+                    setIsTypingFinished(true);
+                    setIsTypingActive(false);
+                }
+            }, 60);
+            return () => clearInterval(intervalId);
+        }
+    }, [startTyping, isTextAreaVisible, fullText, isTypingFinished]);
 
-    if (!storyData) return null;
+    // Typing Sound Effect (เหมือนเดิม)
+    useEffect(() => {
+        const audio = typingAudioRef.current;
+        if (audio) {
+            if (isTypingActive) {
+                audio.play().catch(e => console.warn("Typing sound play failed:", e));
+            } else {
+                audio.pause();
+                if (audio.readyState >= 2) audio.currentTime = 0;
+            }
+        }
+    }, [isTypingActive]);
+
+    const handleRevealClick = () => {
+        setShowRevealContent(prev => !prev);
+    };
+
+    const showPrimaryStartButton = (isPrologue || storyData?.isFirstStoryWithMusicButton) && onTriggerStartFlow;
 
     return (
         <div ref={pageDisplayRef} className={`${styles.storyPageContainer} ${animationClass || ''}`}>
-            <div className={`${styles.storyContentBox} ${isProloguePage ? styles.prologueContentBox : ''}`}>
-                {/* Title is always displayed */}
-                {storyData.title && <h2 className={styles.storyTitleText}>{storyData.title}</h2>}
-
-                {/* Image: Only for non-prologue pages that have an image */}
-                {!isProloguePage && storyData.image && (
-                    <Image
-                        src={storyData.image}
-                        alt={`ความทรงจำ ${storyData.id.replace('story-','')}`}
-                        width={450}
-                        height={270}
-                        className={`${styles.storyImg} ${imageVisible ? styles.storyImg_visible : ''}`}
-                        priority={storyData.id === 'story-1'} // Original story-1 is now stories[1]
-                        style={{ objectFit: 'cover' }}
-                    />
+            <div className={`${styles.storyContentBox} ${isPrologue ? styles.prologueContentBox : ''}`}>
+                
+                {title && <h1 className={styles.storyTitleText}>{title}</h1>}
+                
+                {image && (
+                    <div className={`${styles.storyImageWrapper} ${isImageWrapperVisible ? styles.storyImageWrapper_visible : ''}`}>
+                        <Image
+                            src={image}
+                            alt={title || `Story image ${id}`}
+                            layout="fill"
+                            objectFit="cover"
+                            priority={id === 'story-1' || isPrologue}
+                        />
+                    </div>
+                )}
+                
+                {fullText && (
+                    <pre className={`${styles.storyTextArea} ${isTextAreaVisible ? styles.storyTextArea_visible : ''}`}>
+                        {displayedText}
+                    </pre>
                 )}
 
-                {/* Typewriter Text: Only for non-prologue pages, or if prologue has text */}
-                {/* If prologue text is "", TypewriterEffect will render nothing if modified as above */}
-                <TypewriterEffect
-                    text={storyData.text} // Prologue text is ""
-                    speed={70}
-                    lineBreakPause={300}
-                    // For prologue, imageVisible will be true. Start typing its text if startTyping is true.
-                    startCondition={startTyping && (isProloguePage || imageVisible)}
-                    storyId={storyData.id.replace('story-','')}
-                />
+                {/***************************************************************/}
+                {/*          ส่วนของปุ่มที่แก้ไขแล้ว (อยู่ภายใน Content Box)          */}
+                {/***************************************************************/}
+             
+                {/***************************************************************/}
+                {/*                         จบส่วนของปุ่ม                         */}
+                {/***************************************************************/}
 
-                {isProloguePage ? (
-                    <button
-                        onClick={onTriggerStartFlow}
-                        className={`${styles.introActionButton} ${styles.prologueButton} animate__animated animate__pulse animate__infinite`}
-                    >
-                        เริ่มเรื่องราว...
-                    </button>
-                ) : (
-                    <>
-                        {/* Reveal Button Logic */}
-                        {storyData.reveal && (
+            </div>   {isTypingFinished && (
+                    <div className={styles.actionButtonsContainer}>
+                        {showPrimaryStartButton ? (
+                            // --- Case 1: ปุ่มเริ่มเรื่องราว (Prologue) ---
+                            <button
+                                onClick={onTriggerStartFlow}
+                                className={`${styles.introActionButton} ${styles.prologueButton} animate__animated animate__pulse animate__infinite`}
+                            >
+                                {isPrologue ? "เริ่มเรื่องราว..." : "เริ่มเรื่องราวและเปิดเพลง"}
+                            </button>
+                        ) : (
+                            // --- Case 2 & 3: ไม่ใช่ปุ่มเริ่ม (เป็นหน้าปกติหรือหน้าที่มี Reveal) ---
                             <>
-                                <button onClick={toggleSecret}
-                                        className={`${styles.revealBtn} ${showSecret ? styles.revealBtn_active : ''}`}>
-                                    {storyData.reveal.buttonTextPart1 || (storyData.reveal.buttonText ? storyData.reveal.buttonText.split(' ')[0] : 'ดูเพิ่มเติม')}
-                                    <span className={styles.revealBtnIcon}>{showSecret ? '🙈' : '💌'}</span>
-                                </button>
-                                <div className={`${styles.secretContentDiv} ${showSecret ? styles.secretContentDiv_visible : ''}`}
-                                     dangerouslySetInnerHTML={{ __html: storyData.reveal.content }} />
+                                {/* ถ้าไม่มีปุ่ม Reveal ให้แสดงปุ่ม Next ทันที */}
+                                {!reveal && (
+                                    <button
+                                        onClick={onNext}
+                                        className={`${styles.introActionButton} ${styles.storyNavBtn}`}
+                                    >
+                                        {isLastStory ? 'ไปดูของขวัญกัน!' : 'ถัดไป →'}
+                                    </button>
+                                )}
+
+                                {/* ถ้ามีปุ่ม Reveal ให้แสดง Section ของมัน */}
+                                {reveal && (
+                                    <div className={styles.revealSectionWrapper}>
+                                        <button onClick={handleRevealClick} className={`${styles.revealBtn} ${showRevealContent ? styles.revealBtn_active : ''}`}>
+                                            <span>{reveal.buttonTextPart1 || "ข้อความพิเศษ"}</span>
+                                            <span className={styles.revealBtnIcon}>💌</span>
+                                        </button>
+                                        {reveal.content && (
+                                            <div className={`${styles.secretContentDiv} ${showRevealContent ? styles.secretContentDiv_visible : ''}`}>
+                                                <div dangerouslySetInnerHTML={{ __html: reveal.content }} />
+                                            </div>
+                                        )}
+                                        {/* ปุ่ม Next จะแสดงก็ต่อเมื่อกดเปิด Reveal แล้วเท่านั้น */}
+                                        {showRevealContent && (
+                                             <button
+                                                onClick={onNext}
+                                                className={`${styles.introActionButton} ${styles.storyNavBtn}`}
+                                            >
+                                                {isLastStory ? 'ไปดูของขวัญกัน!' : 'ถัดไป →'}
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
                             </>
                         )}
-
-                        {/* Nav Button */}
-                        <button
-                            onClick={onNext}
-                            className={`${styles.introActionButton} ${styles.storyNavBtn}`}
-                        >
-                            {isLastStory ? 'หน้าถัดไป →' : 'หน้าถัดไป →'}
-                        </button>
-                    </>
+                    </div>
                 )}
-            </div>
+            <audio ref={typingAudioRef} src={TYPING_SOUND_SRC} loop />
         </div>
     );
 }

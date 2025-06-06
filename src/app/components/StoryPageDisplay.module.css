@@ -1,252 +1,247 @@
-/* app/components/StoryPageDisplay.module.css */
+/* StoryPageDisplay.module.css - ธีม "Golden Memories" */
 
+/* ===== 1. CONTAINER หลัก & บรรยากาศของหน้า ===== */
 .storyPageContainer {
-    /* This is the direct child of StoryFlowWrapper, typically fills it */
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center; /* Centers the content box vertically if content is shorter */
-    flex-direction: column;
-    padding: 20px; /* Padding for the overall page view within StoryFlowWrapper */
-    box-sizing: border-box;
-    text-align: center;
-    overflow: hidden; /* Prevent its own scrollbars, parent (StoryFlowWrapper) should scroll */
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 16px;
+  background: linear-gradient(160deg, #fdfbfb 0%, #f3f3f3 100%);
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Playfair Display', 'Kanit', 'Noto Sans Thai', serif;
 }
 
+/* Effect "ฝุ่นทอง" ที่ลอยอย่างนุ่มนวล สร้างบรรยากาศพรีเมียม */
+.storyPageContainer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(circle at 15% 25%, rgba(212, 175, 55, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 85% 75%, rgba(200, 160, 70, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+  background-size: 130px 130px, 190px 190px, 100px 100px;
+  pointer-events: none;
+  animation: subtleFloat 25s ease-in-out infinite;
+}
+
+@keyframes subtleFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(4px, -6px) rotate(0.2deg); }
+}
+
+/* ===== 2. กล่องเนื้อหาหลัก (การ์ด) ===== */
 .storyContentBox {
-    max-width: 720px;
-    width: 90%;
-    padding: 35px 45px;
-    background-color: var(--story-box-bg); /* e.g., rgba(15, 23, 42, 0.6) */
-    border-radius: 12px;
-    box-shadow: var(--story-box-shadow);   /* e.g., 0 10px 30px rgba(0, 0, 0, 0.4) */
-    border: 1px solid var(--story-box-border-color); /* e.g., rgba(var(--accent-color-rgb), 0.25) */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    color: var(--story-text-color-main); /* e.g., #f0e9d6 */
-    max-height: calc(100vh - 80px); /* Max height relative to viewport, minus padding of parent */
-    overflow-y: auto; /* Allow this box to scroll if its content is too long */
+  width: 100%;
+  max-width: 390px; /* พอดีกับ iPhone 14 Pro Max - Padding */
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(15px); /* เอฟเฟกต์กระจกฝ้า */
+  border-radius: 28px;
+  padding: 32px 28px;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.08),
+    0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
-/* Specific styling for Prologue content box if different */
-.prologueContentBox {
-    border: 1px solid var(--story-accent-color);
-    box-shadow: 0 0 20px rgba(var(--accent-color-rgb), 0.2);
-    padding-top: 50px;
-    padding-bottom: 50px;
-}
-.prologueContentBox .storyTitleText {
-    font-size: 2.8em; /* Make prologue title a bit more prominent */
-    color: var(--story-title-color);
-    margin-bottom: 30px;
-}
-.prologueContentBox .storyTextArea {
-    font-size: 1.2em;
-    font-weight: 400;
-    line-height: 1.9;
-    min-height: auto; /* Let it be natural for prologue */
-}
-
-
+/* ===== 3. ส่วนหัว (Title) ===== */
 .storyTitleText {
-    font-family: var(--font-playfair-display), var(--font-noto-serif-thai), serif;
-    font-size: 2.6em;
-    font-weight: 700;
-    color: var(--story-title-color);
-    margin-bottom: 25px;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    letter-spacing: 0.5px;
+  font-size: 32px;
+  font-weight: 400;
+  font-family: 'Playfair Display', serif;
+  color: #4a4a4a;
+  text-align: center;
+  margin: 0 0 28px 0;
+  line-height: 1.2;
+  position: relative;
 }
 
-/* Wrapper for the Image to control aspect ratio */
+/* เส้นคั่นสีทองใต้ Title */
+.storyTitleText::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  opacity: 0.8;
+}
+
+/* ===== 4. รูปภาพความทรงจำ ===== */
 .storyImageWrapper {
-    width: 100%;
-    max-width: 480px; /* Max width for the image display area */
-    aspect-ratio: 16 / 10; /* Example: A common aspect ratio, adjust to your needs (e.g., 4/3, 1/1, 3/4) */
-    overflow: hidden;
-    border-radius: 8px;
-    margin-bottom: 25px;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-    border: 3px solid var(--story-text-color-subtle, #c1b6a0);
-    position: relative; /* For Next/Image with fill prop */
-    opacity: 0;
-    transform: translateY(15px) scale(0.97);
-    transition: opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  
+  /* Animation การปรากฏตัว */
+  opacity: 0;
+  transform: translateY(20px) scale(0.97);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
 .storyImageWrapper_visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
-/* The Next/Image component itself will use fill and object-fit: cover */
 
-
+/* ===== 5. พื้นที่ข้อความเล่าเรื่อง ===== */
 .storyTextArea {
-    font-family: var(--font-noto-serif-thai), var(--font-kanit), serif;
-    font-size: 1.1em;
-    line-height: 1.9;
-    color: var(--story-text-color-main);
-    min-height: 80px; /* Minimum height to prevent layout jumps */
-    margin-bottom: 30px;
-    white-space: pre-wrap;
-    text-align: center;
-    max-width: 90%; /* Limit text width for readability */
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.7s ease-out 0.6s, transform 0.7s ease-out 0.6s; /* Delay after image typically */
+  font-size: 17px;
+  line-height: 1.9;
+  color: #5D4037; /* สีน้ำตาลอบอุ่น */
+  font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
+  font-weight: 300;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: center;
+  margin: 0;
+  
+  /* Animation การปรากฏตัว */
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s; /* delay เล็กน้อย */
 }
+
 .storyTextArea_visible {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Buttons in Story Stage */
+/* ===== 6. CONTAINER สำหรับปุ่มทั้งหมด (อยู่นอกกรอบ) ===== */
+.actionButtonsContainer {
+  width: 100%;
+  max-width: 390px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 1;
+  position: relative;
+}
+
+/* ===== 7. ปุ่มหลัก (ถัดไป, เริ่มเรื่องราว) ===== */
 .introActionButton {
-    background: var(--story-accent-color);
-    color: var(--story-bg); /* Dark text on light gold button */
-    border: none;
-    padding: 12px 30px;
-    font-family: var(--font-kanit), sans-serif;
-    font-size: 1em;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 25px;
-    transition: all 0.25s ease-out;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15), 0 0 0 1px rgba(var(--accent-color-rgb),0.5) inset;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
+  width: 100%;
+  max-width: 320px;
+  padding: 16px 24px;
+  font-size: 17px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(135deg, #434343 0%, #000000 100%);
+  border: none;
+  border-radius: 50px; /* ทำให้มนขึ้น */
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  font-family: 'Kanit', sans-serif;
+  letter-spacing: 0.5px;
 }
+
 .introActionButton:hover {
-    background-color: hsl(from var(--story-accent-color) h s calc(l + 7%)); /* Lighten further */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2), 0 0 0 1px var(--story-accent-color) inset;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
-.initialPlayBtnClass { /* Specific class for "เริ่มเรื่องราวและเปิดเพลง" if needed */
-    /* Inherits from .introActionButton or .prologueButton */
-}
-.prologueButton { /* Style for "เริ่มเรื่องราว..." on Prologue */
-    /* Inherits from .introActionButton */
-    padding: 14px 40px;
-    font-size: 1.15em; /* Make it a bit more prominent */
-}
-.storyNavBtn {
-    /* Inherits from .introActionButton */
+/* ปุ่ม Prologue สีทองพิเศษ */
+.prologueButton {
+  color: #5D4037;
+  background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  border: 1px solid #d4af37;
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
 }
 
+.prologueButton:hover {
+  background: #fff;
+  border-color: #c8a44f;
+  box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2);
+}
 
-/* Reveal Button - Glam Style */
+/* ===== 8. ส่วนของข้อความพิเศษ (Reveal) ===== */
+.revealSectionWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px; /* ระยะห่างระหว่างปุ่ม reveal กับเนื้อหา */
+  margin-top: 24px; /* ระยะห่างจากข้อความหลัก */
+}
+
+/* ปุ่มเปิดข้อความพิเศษ */
 .revealBtn {
-    background-color: transparent;
-    color: var(--story-accent-color);
-    border: 1px solid var(--story-accent-color);
-    padding: 10px 22px;
-    font-family: var(--font-kanit), sans-serif;
-    font-size: 0.9em;
-    font-weight: 500;
-    border-radius: 20px;
-    cursor: pointer;
-    margin-top: 20px;
-    margin-bottom: 15px;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 400;
+  padding: 12px 24px;
+  border-radius: 30px;
+  background: transparent;
+  border: 1px solid #d4af37;
+  color: #b8860b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
 .revealBtn:hover {
-    background-color: rgba(var(--accent-color-rgb), 0.1);
-    border-color: var(--story-title-color);
-    color: var(--story-title-color);
+  background: rgba(212, 175, 55, 0.05);
+  color: #a0791a;
+  transform: translateY(-2px);
 }
-.revealBtnIcon { font-size: 1.1em; transition: transform 0.3s ease-out; }
-.revealBtn_active .revealBtnIcon { transform: rotate(180deg); }
 
+/* เนื้อหาข้อความพิเศษ */
 .secretContentDiv {
-    background-color: rgba(255,255,255,0.03);
-    border: 1px dashed var(--story-text-color-subtle);
-    padding: 0 20px;
-    border-radius: 8px;
-    margin-top: 10px;
-    width: 85%;
-    max-width: 480px;
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: max-height 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55),
-                padding-top 0.7s ease-out,
-                padding-bottom 0.7s ease-out,
-                opacity 0.5s ease-out 0.2s;
+  width: calc(100% - 16px);
+  max-width: 380px;
+  background: linear-gradient(145deg, #fffbf2 0%, #fdf6e8 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 24px;
+  padding: 28px;
+  margin: 0;
+  position: relative;
+  font-family: 'Playfair Display', 'Noto Sans Thai', serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #5D4037;
+  text-align: center;
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-20px) scale(0.98);
+  box-shadow: 0 10px 40px rgba(184, 134, 11, 0.05);
+  transition: 
+    opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    max-height 0.7s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
 .secretContentDiv_visible {
-    max-height: 500px; /* Adjust if content is taller */
-    padding-top: 15px;
-    padding-bottom: 20px;
-    opacity: 1;
+  opacity: 1;
+  max-height: 50vh;
+  transform: translateY(0) scale(1);
+  box-shadow: 0 20px 50px rgba(184, 134, 11, 0.15);
 }
-.secretContentDiv p {
-    font-family: var(--font-noto-serif-thai), var(--font-kanit), serif;
-    font-size: 0.95em;
-    color: var(--story-text-color-subtle);
-    margin-bottom: 15px;
-    line-height: 1.6;
-}
-/* Ensure .secret-image-js is styled in globals.css for image within dangerouslySetInnerHTML */
 
-
-/* Responsive Adjustments for Story Page Display */
-@media (max-width: 600px) {
-    .storyContentBox {
-        padding: 25px 20px; /* Less padding on small screens */
-        max-height: calc(100vh - 60px); /* Adjust max height for smaller screens */
-    }
-    .prologueContentBox {
-        padding-top: 40px;
-        padding-bottom: 40px;
-    }
-    .storyTitleText {
-        font-size: 2.1em; /* Smaller title */
-    }
-    .prologueContentBox .storyTitleText {
-        font-size: 2.2em;
-    }
-
-    .storyImageWrapper {
-        max-width: 95%; /* Allow image wrapper to be wider on small screens */
-        aspect-ratio: 4 / 3; /* Might want a more portrait-friendly aspect ratio on mobile */
-        margin-bottom: 20px;
-        border-width: 2px;
-    }
-
-    .storyTextArea {
-        font-size: 1em;
-        max-width: 95%;
-        min-height: 60px;
-        margin-bottom: 25px;
-    }
-    .prologueContentBox .storyTextArea {
-        font-size: 1.1em;
-    }
-
-    .introActionButton {
-        padding: 10px 22px;
-        font-size: 0.95em;
-        margin-top: 20px;
-    }
-    .prologueButton {
-        padding: 12px 30px;
-        font-size: 1.05em;
-    }
-
-    .revealBtn {
-        font-size: 0.85em;
-        padding: 8px 18px;
-        margin-top: 15px;
-    }
-    .secretContentDiv p {
-        font-size: 0.9em;
-    }
+.secretContentDiv::before {
+  content: '';
+  position: absolute;
+  top: 8px; left: 8px; right: 8px; bottom: 8px;
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+  border-radius: 16px;
+  pointer-events: none;
 }

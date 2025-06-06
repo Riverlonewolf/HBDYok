@@ -1,149 +1,173 @@
-/* app/components/QuizGate.module.css */
+/* QuizGate.module.css - ธีม "Secret Gate" */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Kanit:wght@300;400&display=swap');
 
+/* --- 1. พื้นหลังและบรรยากาศหลัก --- */
 .quizGateWrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* background: var(--bg-quiz); */ /* พื้นหลังไล่ระดับสีน้ำเงิน-ม่วง ควรมาจาก globals.css หรือ page.js */
-    /* ในรูปตัวอย่าง พื้นหลังของ wrapper ดูเหมือนจะเป็นสีไล่ระดับเดียวกับ body */
-    /* ถ้า page.js กำหนด background ให้ wrapper หลักแล้ว ตรงนี้อาจจะไม่ต้องใส่ background อีก */
-    padding: 20px;
-    box-sizing: border-box;
-    text-align: center;
-    z-index: 300;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  overflow: hidden;
+  position: relative;
+  font-family: 'Kanit', sans-serif;
 }
 
+/* Effect คล้ายตารางดิจิทัล (Grid) และดาวระยิบระยับ */
+.quizGateWrapper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(0, 245, 195, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 195, 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: panGrid 60s linear infinite;
+}
+
+@keyframes panGrid {
+  0% { background-position: 0 0; }
+  100% { background-position: 240px -240px; }
+}
+
+/* --- 2. กล่องคำถามหลัก --- */
 .quizContentBox {
-    background-color: #ffffff; /* สีขาวทึบเหมือนในรูป */
-    color: #333745; /* สีข้อความเข้ม บนพื้นขาว */
-    padding: 40px 35px; /* เพิ่ม padding บน-ล่าง */
-    border-radius: 24px; /* โค้งมนมากขึ้น */
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0,0,0,0.05); /* เงาที่ดูนุ่มนวลและมีมิติ */
-    max-width: 480px; /* ปรับความกว้างให้ใกล้เคียง */
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* จัดเนื้อหาให้อยู่กลาง */
+  width: 100%;
+  max-width: 410px; /* พอดีกับ iPhone 14 Pro Max */
+  background: rgba(12, 15, 22, 0.7); /* สีพื้นหลังโปร่งแสง */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 245, 195, 0.25);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 0 40px rgba(0, 245, 195, 0.1), 0 0 15px rgba(0, 245, 195, 0.1);
+  text-align: center;
+  color: #e0e5f0;
+  animation: glowPulse 5s infinite ease-in-out;
 }
 
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(0, 245, 195, 0.1), 0 0 15px rgba(0, 245, 195, 0.1); }
+  50% { box-shadow: 0 0 50px rgba(0, 245, 195, 0.18), 0 0 20px rgba(0, 245, 195, 0.18); }
+}
+
+/* --- 3. ส่วนหัวข้อและคำถาม --- */
 .quizTitleText {
-    font-family: var(--font-kanit), sans-serif; /* หรือฟอนต์ที่คุณต้องการสำหรับหัวข้อ */
-    font-size: 1.8em; /* ปรับขนาดตามความเหมาะสม */
-    font-weight: 700; /* ตัวหนา */
-    color: #333745; /* สีเดียวกับข้อความทั่วไป */
-    margin-bottom: 8px; /* ลดระยะห่างด้านล่าง */
-    display: flex; /* สำหรับจัด icon กับ text */
-    align-items: center;
-    gap: 10px; /* ระยะห่างระหว่าง icon กับ text */
+  font-family: 'Orbitron', sans-serif; /* ฟอนต์สไตล์เทคโนโลยี */
+  font-size: 28px;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(0, 245, 195, 0.5);
 }
 
-/* Icon สำหรับหัวข้อ Quiz (คุณจะต้องเพิ่ม SVG หรือ Font Icon ใน JSX) */
+/* ไอคอนแสกนลายนิ้วมือ */
 .quizTitleIcon {
-    width: 32px; /* ขนาด icon */
-    height: 32px;
-    background-color: var(--primary-color); /* สีชมพูของ icon */
-    border-radius: 50%;
-    /* ถ้าเป็น SVG ก็ใส่ SVG content ตรงนี้ หรือใช้ <img> */
-    /* ตัวอย่างง่ายๆ ด้วย div */
-    display: inline-block; /*เพื่อให้แสดงผล*/
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(0, 245, 195, 0.5);
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+.quizTitleIcon::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 10px;
+  background-color: #00f5c3;
+  animation: scanLine 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes scanLine {
+  0% { top: 4px; }
+  50% { top: 12px; }
+  100% { top: 4px; }
 }
 
-
-.quizQuestionP { /* Class ใหม่สำหรับคำถามโดยเฉพาะ */
-    font-family: var(--font-kanit), sans-serif;
-    font-size: 1.1em; /* ปรับขนาด */
-    line-height: 1.6;
-    color: #555e76; /* สีเทาเข้มนิดๆ */
-    margin-bottom: 30px; /* เพิ่มระยะห่างก่อนถึงตัวเลือก */
-    max-width: 90%; /* ไม่ให้คำถามยาวเกินไป */
+.quizQuestionP {
+  font-size: 18px;
+  line-height: 1.7;
+  color: #a8b2d1;
+  margin: 0 auto 32px auto;
+  max-width: 90%;
 }
 
+/* --- 4. ตัวเลือกคำตอบ --- */
 .quizOptionsDiv {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px; /* เพิ่มระยะห่างระหว่างปุ่ม */
-    width: 100%;
-    max-width: 100%; /* ให้ปุ่มเต็มความกว้างของ content box */
-    margin-bottom: 25px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .quizOptionBtn {
-    background-color: #f7f8fc; /* สีพื้นหลังปุ่มตัวเลือก (เทาอ่อนมาก) */
-    color: #333745; /* สีข้อความบนปุ่ม */
-    border: 1px solid #e8eaf0; /* สีขอบปุ่ม */
-    padding: 16px 20px; /* เพิ่ม padding ให้ปุ่มดูใหญ่ขึ้น */
-    font-family: var(--font-kanit), sans-serif;
-    font-size: 0.95em; /* ปรับขนาด font ในปุ่ม */
-    font-weight: 500; /* Medium weight */
-    border-radius: 12px; /* โค้งมนปานกลาง */
-    cursor: pointer;
-    text-align: center; /* จัดข้อความให้อยู่กลางปุ่ม */
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease-out, box-shadow 0.2s ease;
-    width: 100%;
-    box-sizing: border-box;
+  font-family: 'Kanit', sans-serif;
+  font-size: 16px;
+  padding: 16px;
+  background: transparent;
+  border: 1px solid rgba(0, 245, 195, 0.4);
+  color: #e0e5f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  position: relative;
 }
 
-.quizOptionBtn:hover:not(.disabled) {
-    background-color: #ffffff;
-    border-color: var(--primary-color); /* สีชมพูเมื่อ hover */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 248, 205, 218), 0.3); /* เงาสีชมพูอ่อนๆ เมื่อ hover */
-}
-/* สร้างตัวแปร --primary-color-rgb ใน globals.css ถ้ายังไม่มี
-   :root { --primary-color-rgb: 248, 205, 218; }
-*/
-
-.quizOptionBtn:active:not(.disabled) {
-    transform: scale(0.98) translateY(0);
-    box-shadow: 0 2px 6px rgba(var(--primary-color-rgb), 0.2);
+.quizOptionBtn:not(.disabled):hover {
+  background-color: rgba(0, 245, 195, 0.1);
+  color: #ffffff;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(0, 245, 195, 0.1);
 }
 
-.quizOptionBtn.disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    background-color: #f0f2f5;
-    border-color: #dde0e5;
+.quizOptionBtn:focus-visible {
+  outline: 2px solid #00f5c3;
+  outline-offset: 2px;
 }
 
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: rgba(136, 146, 176, 0.3);
+}
+
+/* --- 5. ผลลัพธ์ (Feedback) --- */
 .quizFeedbackP {
-    margin-top: 20px;
-    font-size: 1em;
-    font-weight: 600;
-    min-height: 1.5em;
-    opacity: 0;
-    transition: opacity 0.4s ease-in-out;
+  margin-top: 24px;
+  font-size: 18px;
+  font-weight: 500;
+  height: 27px; /* จองพื้นที่ไว้กัน Layout กระโดด */
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
-.quizFeedbackP.visible { opacity: 1; }
-.quizFeedbackP.correct { color: #28a745; } /* สีเขียวสำหรับถูก */
-.quizFeedbackP.incorrect { color: #dc3545; } /* สีแดงสำหรับผิด */
 
+.quizFeedbackP.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-    .quizContentBox {
-        padding: 30px 25px;
-    }
-    .quizTitleText {
-        font-size: 1.6em;
-    }
-    .quizTitleIcon {
-        width: 28px;
-        height: 28px;
-    }
-    .quizQuestionP {
-        font-size: 1em;
-        margin-bottom: 25px;
-    }
-    .quizOptionBtn {
-        padding: 14px 18px;
-        font-size: 0.9em;
-    }
-    .quizOptionsDiv {
-        gap: 12px;
-    }
+.correct {
+  color: #00f5c3; /* สีเขียวนีออน */
+  text-shadow: 0 0 8px #00f5c3;
+}
+
+.incorrect {
+  color: #ff4757; /* สีแดงแจ้งเตือน */
+  text-shadow: 0 0 8px #ff4757;
+}
+
+/* --- Responsive สำหรับจอที่ใหญ่ขึ้น --- */
+@media (min-width: 400px) {
+  .quizOptionsDiv {
+    /* ถ้าต้องการให้เป็น 2x2 บนจอที่กว้างขึ้นเล็กน้อย */
+    /* grid-template-columns: 1fr 1fr; */
+  }
 }
