@@ -1,4 +1,3 @@
-// app/components/StoryPageDisplay.js
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
@@ -14,10 +13,6 @@ export default function StoryPageDisplay({
     isLastStory,
     animationClass
 }) {
-    // =======================================================================
-    // --- STEP 1: เรียกใช้ Hooks ทั้งหมดที่ด้านบนสุด (รวม useEffect) ---
-    // ไม่ว่าเงื่อนไขจะเป็นอย่างไร ส่วนนี้จะถูกเรียกใช้เสมอในลำดับเดิม
-    // =======================================================================
     const [displayedText, setDisplayedText] = useState('');
     const [isTypingFinished, setIsTypingFinished] = useState(false);
     const [isTypingActive, setIsTypingActive] = useState(false);
@@ -27,9 +22,7 @@ export default function StoryPageDisplay({
     const typingAudioRef = useRef(null);
     const pageDisplayRef = useRef(null);
 
-    // ย้าย useEffect ทั้งหมดขึ้นมาที่นี่
     useEffect(() => {
-        // Guard clause ภายใน useEffect เพื่อป้องกัน error ถ้า storyData ไม่มีค่า
         if (!storyData) return;
 
         setIsImageWrapperVisible(false);
@@ -47,7 +40,7 @@ export default function StoryPageDisplay({
             };
             const handlePageAnimEnd = () => setTimeout(showElements, 50);
             pageElement.addEventListener('animationend', handlePageAnimEnd, { once: true });
-            
+
             const timer = setTimeout(() => {
                 if (!animationClass || animationClass.trim() === '') showElements();
             }, 100);
@@ -57,7 +50,7 @@ export default function StoryPageDisplay({
                 clearTimeout(timer);
             };
         }
-    }, [storyData, animationClass]); // << เพิ่ม storyData ใน dependency array
+    }, [storyData, animationClass]);
 
     useEffect(() => {
         const fullText = storyData?.text || '';
@@ -76,7 +69,7 @@ export default function StoryPageDisplay({
             }, 60);
             return () => clearInterval(intervalId);
         }
-    }, [startTyping, isTextAreaVisible, storyData, isTypingFinished]); // << เพิ่ม storyData
+    }, [startTyping, isTextAreaVisible, storyData, isTypingFinished]);
 
     useEffect(() => {
         const audio = typingAudioRef.current;
@@ -90,34 +83,47 @@ export default function StoryPageDisplay({
         }
     }, [isTypingActive]);
 
-    // ==========================================================================
-    // --- STEP 2: ตรวจสอบ props และ return ออกไปก่อนได้ (Guard Clause) ---
-    // ส่วนนี้จะอยู่ "หลัง" จากเรียกใช้ Hooks ทั้งหมดแล้ว
-    // ==========================================================================
     if (!storyData) {
         return null;
     }
 
-    // ==========================================================================
-    // --- STEP 3: Logic และฟังก์ชันอื่นๆ ---
-    // ==========================================================================
     const { id, title, text, image, isPrologue, reveal } = storyData;
+
     const handleRevealClick = () => {
         setShowRevealContent(prev => !prev);
     };
+
+    const handleNavigationClick = () => {
+        if (isTypingActive) {
+            setDisplayedText(text || '');
+            setIsTypingFinished(true);
+            setIsTypingActive(false);
+        } else {
+            onNext();
+        }
+    };
+
     const showPrimaryStartButton = (isPrologue || storyData?.isFirstStoryWithMusicButton) && onTriggerStartFlow;
 
-    // ==========================================================================
-    // --- STEP 4: ส่วนของ JSX ที่จะ Render ---
-    // ==========================================================================
     return (
         <div ref={pageDisplayRef} className={`${styles.storyPageContainer} ${animationClass || ''}`}>
-            {/* กล่องเนื้อหาหลัก */}
             <div className={`${styles.storyContentBox} ${isPrologue ? styles.prologueContentBox : ''}`}>
-                {title && <h1 className={styles.storyTitleText}>{title}</h1>}
+                {title && (
+                    <h1
+                        className={styles.storyTitleText}
+                        dangerouslySetInnerHTML={{ __html: title }}
+                    />
+                )}
+
                 {image && (
                     <div className={`${styles.storyImageWrapper} ${isImageWrapperVisible ? styles.storyImageWrapper_visible : ''}`}>
-                        <Image src={image} alt={title || `Story image ${id}`} layout="fill" objectFit="cover" priority={id === 'story-1' || isPrologue} />
+                        <Image
+                            src={image}
+                            alt={title || `Story image ${id}`}
+                            layout="fill"
+                            objectFit="cover"
+                            priority={id === 'story-1' || isPrologue}
+                        />
                     </div>
                 )}
                 {text && (
@@ -127,23 +133,28 @@ export default function StoryPageDisplay({
                 )}
             </div>
 
-            {/* ส่วนของปุ่มทั้งหมด */}
-            {isTypingFinished && (
+            {isTextAreaVisible && (
                 <div className={styles.actionButtonsContainer}>
                     {showPrimaryStartButton ? (
-                        <button onClick={onTriggerStartFlow} className={`${styles.introActionButton} ${styles.prologueButton} animate__animated animate__pulse animate__infinite`}>
+                        <button
+                            onClick={onTriggerStartFlow}
+                            className={`${styles.introActionButton} ${styles.prologueButton} animate__animated animate__pulse animate__infinite`}
+                        >
                             {isPrologue ? "เริ่มเรื่องราว..." : "เริ่มเรื่องราวและเปิดเพลง"}
                         </button>
                     ) : (
                         <>
                             {!reveal && (
-                                <button onClick={onNext} className={`${styles.introActionButton} ${styles.storyNavBtn}`}>
-                                    {isLastStory ? 'ถัดไป →' : 'ถัดไป →'}
+                                <button onClick={handleNavigationClick} className={`${styles.introActionButton} ${styles.storyNavBtn}`}>
+                                    {isLastStory ? 'จบการผจญภัย!' : 'ถัดไป →'}
                                 </button>
                             )}
                             {reveal && (
                                 <div className={styles.revealSectionWrapper}>
-                                    <button onClick={handleRevealClick} className={`${styles.revealBtn} ${showRevealContent ? styles.revealBtn_active : ''}`}>
+                                    <button
+                                        onClick={handleRevealClick}
+                                        className={`${styles.revealBtn} ${showRevealContent ? styles.revealBtn_active : ''}`}
+                                    >
                                         <span>{reveal.buttonTextPart1 || "ข้อความพิเศษ"}</span>
                                         <span className={styles.revealBtnIcon}>💌</span>
                                     </button>
@@ -153,8 +164,8 @@ export default function StoryPageDisplay({
                                         </div>
                                     )}
                                     {showRevealContent && (
-                                        <button onClick={onNext} className={`${styles.introActionButton} ${styles.storyNavBtn}`}>
-                                            {isLastStory ? 'ถัดไป →' : 'ถัดไป →'}
+                                        <button onClick={handleNavigationClick} className={`${styles.introActionButton} ${styles.storyNavBtn}`}>
+                                            {isLastStory ? 'จบการผจญภัย!' : 'ถัดไป →'}
                                         </button>
                                     )}
                                 </div>
@@ -163,7 +174,7 @@ export default function StoryPageDisplay({
                     )}
                 </div>
             )}
-            
+
             <audio ref={typingAudioRef} src={TYPING_SOUND_SRC} loop />
         </div>
     );
