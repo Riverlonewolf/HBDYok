@@ -47,7 +47,7 @@ export default function StoryFlow({
 
         // ถ้า story ปัจจุบันมี extraMusic ให้เล่น
         if (musicSrc) {
-             if (mainAudioRef.current) mainAudioRef.current.volume = 0.2; // ลดเสียงเพลงหลัก
+             if (mainAudioRef.current) mainAudioRef.current.volume = 0.; // ลดเสียงเพลงหลัก
              extraAudioRef.current = new Audio(musicSrc);
              extraAudioRef.current.play().catch(() => {});
              
